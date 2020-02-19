@@ -1,0 +1,31 @@
+image: node:latest
+
+stages:
+  - build
+  - production
+
+cache:
+  paths:
+    - node_modules/
+
+install_dependencies:
+  stage: build
+  script: 
+    - npm install
+  artifacts:
+    paths:
+      - node_modules/
+  only:
+    - master
+
+production:
+  type: deploy
+  stage: production
+  image: ruby:latest
+  script:
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=pangram-of-the-day1 --api-key=$HEROKU_API_KEY
+  only:
+    - master
