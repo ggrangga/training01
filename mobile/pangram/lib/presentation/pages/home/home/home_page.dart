@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
             title: Text('Settings'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.album),
             title: Text('Pangram'),
           ),
         ],

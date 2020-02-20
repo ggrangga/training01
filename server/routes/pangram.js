@@ -13,6 +13,7 @@ module.exports = mongoose => [
     method: 'GET',
     path: '/pangram',
     handler: async (request, response) => {
+      request.lo
       const Train = mongoose.model('trains');
       const existingTrain = await Train.findOne({"book": '1661-0.txt_1'});
       if(existingTrain !== null){
