@@ -38,5 +38,6 @@ lib/generated_plugin_registrant.dart
 
 # API related
 node_modules
+/server/package-lock.json
 
 .git
