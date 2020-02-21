@@ -16,6 +16,7 @@ mongoose.connect('mongodb://noOne:noOne654321@ds217438.mlab.com:17438/training',
 });
 
 require('./models/Train');
+require('./models/Anagram');
 
 const init = async () => {
   
@@ -31,7 +32,8 @@ const init = async () => {
       },
     };
 
-  await server.register([Blipp, {
+  await server.register([Blipp, 
+    {
       plugin: Pino,
       options: {
           prettyPrint: process.env.NODE_ENV !== 'production',

@@ -8,6 +8,17 @@ const schema = Joi.object({
       .required()
       .description('the User name used'),
 });
+
+const schema1 = Joi.object({
+  anagram: Joi.string()
+      .alphanum()
+      .min(3)
+      .required(),
+  anagram1: Joi.string()
+      .alphanum()
+      .min(3)
+      .required(),
+});
 module.exports = mongoose => [
   {
     method: 'GET',
@@ -40,5 +51,61 @@ module.exports = mongoose => [
         payload: schema
       },
     }
-  },  
+  },
+  {
+    method: 'POST',
+    path: '/anagram',
+    handler: async (request, h) => {
+      const anagram = request.payload.anagram;
+      const anagram1 = request.payload.anagram1;
+      const axios = require('axios');          
+      const promise = new Promise((resolve, reject) => {
+        if(anagram.length === anagram1.length){          
+          axios.get('http://www.anagramica.com/all/'+anagram).then(resp => {
+            let tryFind = resp.data.all.find(x => x === anagram1);
+            const response = h.response({"status": tryFind ? "Sukses" : "Not sukses","data":resp.data}).header('Content-Type', 'application/json');
+            resolve(response);
+          });
+        }
+      });      
+      return promise;
+    },
+    options: {
+      tags: ['api'],
+      validate: {
+        payload: schema1
+      },
+    }
+  },
+  {
+    method: 'POST',
+    path: '/addText',
+    handler: async (request, response) => {
+      const Anagram = mongoose.model('anagrams');
+      var lineReader = require('line-reader');
+
+      const title = JSON.parse(request.payload).title;
+      
+      function getFile() {
+        return new Promise(function(resolve, reject) {
+          let txts = [];
+          console.log(title);
+          lineReader.eachLine(title, function(line, last) {
+            txts.push(line);
+            if(last){
+              resolve(txts);
+            }
+          });     
+        })        
+      };
+      await getFile().then(async data => {
+        const existingAnagram = await Anagram.findOne({'title': title});
+        if(existingAnagram === null){
+          await new Anagram({'data':data,'title': title}).save();
+        }
+      });
+
+      return {'status':'Sukses','title': title};
+    },
+  },
 ];
