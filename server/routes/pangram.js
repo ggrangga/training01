@@ -60,14 +60,22 @@ module.exports = mongoose => [
       const anagram1 = request.payload.anagram1;
       const axios = require('axios');          
       const promise = new Promise((resolve, reject) => {
-        if(anagram.length === anagram1.length){          
-          axios.get('http://www.anagramica.com/all/'+anagram).then(resp => {
-            let tryFind = resp.data.all.find(x => x === anagram1);
-            const response = h.response({"status": tryFind ? "Sukses" : "Not sukses","data":resp.data}).header('Content-Type', 'application/json');
-            resolve(response);
-          });
-        }
-      });      
+        if(anagram.length === anagram1.length)
+          Promise.all([
+            axios.get('http://www.anagramica.com/lookup/'+anagram), 
+            axios.get('http://www.anagramica.com/lookup/'+anagram1)
+          ]).then(async ([res1, res2]) =>{
+            if(res1.data.found === 1 && res1.data.found == res2.data.found){
+              await axios.get('http://www.anagramica.com/all/'+anagram).then(resp => {
+                let tryFind = resp.data.all.find(x => x === anagram1);
+                if(tryFind)
+                  resolve(h.response({"status": "Data sukses matching","other": resp.data.all.filter(x => x !== anagram && x !== anagram1)}).header('Content-Type', 'application/json'));
+              });
+            }
+            resolve(h.response({"status": "Data not sukses matching"}).header('Content-Type', 'application/json'));
+          });        
+      });
+
       return promise;
     },
     options: {

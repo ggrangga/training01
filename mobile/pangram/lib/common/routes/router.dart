@@ -8,9 +8,13 @@ import 'package:demo_app/presentation/pages/home/setting/setting_screen.dart';
 import 'package:demo_app/presentation/pages/home/search/movieDetail_screen.dart';
 import 'package:demo_app/presentation/pages/home/pangram/showPangram_screen.dart';
 
+import 'package:demo_app/presentation/pages/home/pangram/bloc/pangram_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:demo_app/common/config/injector.dart';
+
 abstract class Router {
   static Map<String, WidgetBuilder> routes = {
-    Routes.home: (BuildContext context) => HomePage(),
+    Routes.home: (BuildContext context) => _buildHomePage(),
     Routes.dashboard: (BuildContext context) => HomePage(page: HomePageOptions.dashboard,),
     Routes.login: (BuildContext context) => LoginScreen(),
     Routes.search: (BuildContext context) => SearchScreen(),
@@ -19,4 +23,21 @@ abstract class Router {
     Routes.movieDetail: (BuildContext context) => MovieDetailScreen(),  
     Routes.pangram: (BuildContext context) => PangramScreen(),  
   };
+
+  static Widget _buildHomePage({HomePageOptions page}) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<PangramBloc>(
+          create: (BuildContext context) => getIt<PangramBloc>(),
+        ),
+      ],
+      child: HomePage(page: page),
+    );
+  }
+
+  static Route _buildPangramRoute(RouteSettings settings) {
+    return MaterialPageRoute(
+      builder: (context) => _buildHomePage(page: HomePageOptions.pangram),
+    );
+  }
 }
