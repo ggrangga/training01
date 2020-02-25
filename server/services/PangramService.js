@@ -19,11 +19,14 @@ async function getAngram01(lookup1){
   });
 };
 
-async function getAngram02(lookup1, mongoose){
+async function getAngram02(lookup1, lookup2, mongoose){
   const Anagram = mongoose.model('anagrams');
-  const arr = getCombinationOfWord(lookup1);
-  const existingAnagram = await Anagram.findOne({'title':'words.txt', 'data': {$in:[...arr]}});
-  return existingAnagram !== null ? {"status": "Data sukses matching"} : null;
+  const arr = getCombinationOfWord(lookup1).filter(x => x === lookup2);
+  if(arr){
+    const existingAnagram = await Anagram.findOne({'title':'words.txt', 'data': {$in:[...arr]}});
+    return existingAnagram !== null ? {"status": "Data sukses matching"} : null;
+  }
+  return null;  
 };
 
 function getCombinationOfWord(chars){

@@ -73,7 +73,7 @@ module.exports = mongoose => [
               if(tryFind)
                 resolve(h.response({"status": "Data sukses matching","other": resp.data.all.filter(x => x !== anagram && x !== anagram1)}).header('Content-Type', 'application/json'));
               */
-              const resp = await pangramService.getAngram02(anagram, mongoose);
+              const resp = await pangramService.getAngram02(anagram, anagram1, mongoose);
               if(resp)
                 resolve(h.response({...resp}).header('Content-Type', 'application/json'));
             }
