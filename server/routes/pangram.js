@@ -60,33 +60,34 @@ module.exports = mongoose => [
       const anagram = request.payload.anagram;
       const anagram1 = request.payload.anagram1;
       const axios = require('axios');          
-      const promise = new Promise((resolve, reject) => {
-        if(anagram.length === anagram1.length)        
-          Promise.all([
-            pangramService.lookupWord(anagram),
-            pangramService.lookupWord(anagram1),
-          ]).then(async ([res1, res2]) =>{
-            if(res1.data.found > 0 && res2.data.found > 0){
-              /*this on working
-              const resp = await pangramService.getAngram01(anagram);
-              let tryFind = resp.data.all.find(x => x === anagram1);
-              if(tryFind)
-                resolve(h.response({"status": "Data sukses matching","other": resp.data.all.filter(x => x !== anagram && x !== anagram1)}).header('Content-Type', 'application/json'));
-              */
-              const resp = await pangramService.getAngram02(anagram, anagram1, mongoose);
-              if(resp)
-                resolve(h.response({...resp}).header('Content-Type', 'application/json'));
-            }
-            resolve(h.response({"status": "Data not sukses matching"}).header('Content-Type', 'application/json'));
-          });        
+      return new Promise((resolve, reject) => {
+        Promise.all([
+          pangramService.lookupWord(anagram),
+          pangramService.lookupWord(anagram1),
+        ]).then(async ([res1, res2]) =>{
+          let _resp = {"status": "Data not sukses matching"};
+          if(res1.data.found > 0 && res2.data.found > 0){
+            const resp = await pangramService.getAngram02(anagram, anagram1, mongoose);
+            if(resp)
+              _resp = resp;
+          }
+          resolve(h.response({..._resp}).header('Content-Type', 'application/json'));
+        });
       });
-      return promise;
     },
     options: {
       validate: {
         payload: schema1
       },
     }
+  },
+  {
+    method: 'POST',
+    path: '/isogram',
+    handler: async (request, h) => {
+      const anagram = request.payload.isogram;
+      return {"text":"Hello worrld"};
+    },
   },
   {
     method: 'POST',
