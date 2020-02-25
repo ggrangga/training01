@@ -1,4 +1,5 @@
 const Joi = require('@hapi/joi');
+const pangramService = require('../services/PangramService');
 
 const schema = Joi.object({
   username: Joi.string()
@@ -59,23 +60,34 @@ module.exports = mongoose => [
       const anagram = request.payload.anagram;
       const anagram1 = request.payload.anagram1;
       const axios = require('axios');          
-      const promise = new Promise((resolve, reject) => {
-        if(anagram.length === anagram1.length){          
-          axios.get('http://www.anagramica.com/all/'+anagram).then(resp => {
-            let tryFind = resp.data.all.find(x => x === anagram1);
-            const response = h.response({"status": tryFind ? "Sukses" : "Not sukses","data":resp.data}).header('Content-Type', 'application/json');
-            resolve(response);
-          });
-        }
-      });      
-      return promise;
+      return new Promise((resolve, reject) => {
+        Promise.all([
+          pangramService.lookupWord(anagram),
+          pangramService.lookupWord(anagram1),
+        ]).then(async ([res1, res2]) =>{
+          let _resp = {"status": "Data not sukses matching"};
+          if(res1.data.found > 0 && res2.data.found > 0){
+            const resp = await pangramService.getAngram02(anagram, anagram1, mongoose);
+            if(resp)
+              _resp = resp;
+          }
+          resolve(h.response({..._resp}).header('Content-Type', 'application/json'));
+        });
+      });
     },
     options: {
-      tags: ['api'],
       validate: {
         payload: schema1
       },
     }
+  },
+  {
+    method: 'POST',
+    path: '/isogram',
+    handler: async (request, h) => {
+      const isogram = request.payload.isogram;
+      return pangramService.getIsogram(isogram);
+    },
   },
   {
     method: 'POST',
@@ -108,4 +120,17 @@ module.exports = mongoose => [
       return {'status':'Sukses','title': title};
     },
   },
+  {
+    method: 'GET',
+    path: '/test',
+    handler: async (request, response) => {
+      const Anagram = mongoose.model('anagrams');
+      const arr = pangramService.getCombinationOfWord('listen');
+      const existingAnagram = await Anagram.findOne({'title':'words.txt', 'data': {$in:[...arr]}});
+      return {'data':existingAnagram !== null ? true : false,statusCode: 500};
+    },
+    options: {
+      tags: ['api'],
+    }
+  }
 ];
