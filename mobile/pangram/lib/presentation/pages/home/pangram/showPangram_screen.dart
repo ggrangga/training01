@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as https;
 import 'dart:convert';
 
 class PangramScreen extends StatefulWidget {
@@ -14,10 +14,12 @@ class _PangramScreen extends State<PangramScreen> {
   String _value;
   String _TextField1;
   String _TextField2;
+  List<String> angramList;
+  String angramStatus;
 
   void fetchPangram() async {
     Map<String, String> header = {'Content-Type': 'application/json'};
-    var response = await http.get('http://pangram-of-the-day.herokuapp.com/pangram', headers: header);
+    var response = await https.get('https://pangram-of-the-day.herokuapp.com/pangram', headers: header);
     if (response.statusCode == 200) {
       var _json = json.decode(response.body);
       var data = _json['data'];
@@ -33,19 +35,33 @@ class _PangramScreen extends State<PangramScreen> {
       map["anagram"] = _TextField1.toString();
       map["anagram1"] = _TextField1.toString();
 
-      var response = await http.post(
-        'http://pangram-of-the-day.herokuapp.com/', 
+      var response = await https.post(
+        'https://pangram-of-the-day.herokuapp.com/anagram', 
         headers: {'Content-Type': 'application/json'}, 
         body: json.encode(map)
       );
 
-      print(' anagram => ' + response.statusCode.toString());
+      if (response.statusCode == 200) {
+        var _json = json.decode(response.body);
+        var _status = _json['status'];
+        var _other = _json['other'];
+        print('=> ' +_status);
+        print(_other);
+        setState(() {
+          angramList = new List.from(_json['other']);
+          angramStatus = _json['status'];
+        });
+      }else{
+        print(' anagram => ' + response.statusCode.toString());
+        print(' anagram => ' + response.reasonPhrase.toString());      
+      }
     }
   }
 
    void initPage(){
       if(_value== null){
         setState(() {
+          angramStatus = '';
           _value = 'Pangram';
         });
       } 
@@ -169,6 +185,10 @@ class _PangramScreen extends State<PangramScreen> {
                 getAnagram();
               }
             )
+          ),
+          Container(margin: EdgeInsets.only(bottom: 30.0)),
+          Container(
+            child: Text(angramStatus)
           )
         ]
       )
