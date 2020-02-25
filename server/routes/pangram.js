@@ -85,8 +85,8 @@ module.exports = mongoose => [
     method: 'POST',
     path: '/isogram',
     handler: async (request, h) => {
-      const anagram = request.payload.isogram;
-      return {"text":"Hello worrld"};
+      const isogram = request.payload.isogram;
+      return pangramService.getIsogram(isogram);
     },
   },
   {

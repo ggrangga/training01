@@ -5,6 +5,7 @@ module.exports = {
   lookupWord,
   getAngram01,
   getAngram02,
+  getIsogram,
   getCombinationOfWord
 };
 
@@ -27,6 +28,20 @@ async function getAngram02(lookup1, lookup2, mongoose){
     return existingAnagram !== null ? {"status": "Data sukses matching"} : null;
   }
   return null;  
+};
+
+function getIsogram(lookup1){
+  let strArray = [];
+  let resp = {};
+  lookup1.split('').filter(x => x !== ' ' && x !== '-').forEach((element, index, array) => {
+    let findX = strArray.find(x => x === element);
+    if(findX) resp = {'status':'Not an Isogram!'};
+    else strArray.push(element);
+    
+    if(index === array.length - 1 && Object.entries(resp).length === 0) 
+      resp = {'status':'An Isogram!'};
+  });
+  return resp;
 };
 
 function getCombinationOfWord(chars){
